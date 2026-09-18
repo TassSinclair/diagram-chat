@@ -2,6 +2,8 @@
 
 An experimental tool for exploring diagramming interactions with an LLM agent. Chat with a model and get back rendered diagrams in real time.
 
+![screenshot.png](screenshot.png)
+
 ## Supported diagram types
 
 - **D2** — declarative diagrams via [D2](https://d2lang.com)
