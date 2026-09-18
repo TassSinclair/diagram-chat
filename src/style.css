@@ -242,10 +242,7 @@ body {
 }
 
 .metrics-panel {
-  background: var(--metrics-bg);
-  border: 1px solid var(--metrics-border);
-  border-radius: 8px;
-  padding: 10px 16px;
+  padding: 4px 0 0;
   font-size: 12px;
   color: var(--text-secondary);
   display: flex;

@@ -46,5 +46,10 @@ export function MermaidBlock({ code }: { code: string }) {
     );
   }
 
-  return <div ref={ref} className="mermaid-container" />;
+  return (
+    <div className="mermaid-container">
+      <div ref={ref} />
+      <div hidden data-diagram-source="mermaid">{code}</div>
+    </div>
+  );
 }

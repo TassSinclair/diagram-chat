@@ -51,5 +51,10 @@ export function D2Block({ code }: { code: string }) {
     );
   }
 
-  return <div ref={ref} className="d2-container" />;
+  return (
+    <div className="d2-container">
+      <div ref={ref} />
+      <div hidden data-diagram-source="d2">{code}</div>
+    </div>
+  );
 }

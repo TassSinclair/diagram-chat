@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Conversation, ChatMessage, Metrics } from "./types";
+import type { Conversation, ChatMessage } from "./types";
 import { MessageBubble } from "./components/MessageBubble";
 import { MetricsPanel } from "./components/MetricsPanel";
 import { ChatInput } from "./components/ChatInput";
@@ -7,7 +7,6 @@ import { ChatInput } from "./components/ChatInput";
 export function App() {
   const [conversation, setConversation] = useState<Conversation>({
     messages: [],
-    metrics: null,
     model: null,
   });
   const [streaming, setStreaming] = useState(false);
@@ -129,16 +128,21 @@ export function App() {
 
         case "metrics": {
           const usage = (event.usage || {}) as Record<string, number>;
-          const metrics: Metrics = {
-            totalCostUsd: (event.totalCostUsd as number) || 0,
-            inputTokens: usage.input_tokens || 0,
-            outputTokens: usage.output_tokens || 0,
-            durationMs: (event.durationMs as number) || 0,
-            ttftMs: (event.ttftMs as number) || 0,
-            modelUsage:
-              (event.modelUsage as Metrics["modelUsage"]) || {},
-          };
-          setConversation((prev) => ({ ...prev, metrics }));
+          setConversation((prev) => ({
+            ...prev,
+            messages: prev.messages.map((m) =>
+              m.id === assistantId
+                ? {
+                    ...m,
+                    metrics: {
+                      inputTokens: usage.input_tokens || 0,
+                      outputTokens: usage.output_tokens || 0,
+                      thinkingTokens: usage.thinking_tokens || 0,
+                    },
+                  }
+                : m
+            ),
+          }));
           break;
         }
 
@@ -177,19 +181,20 @@ export function App() {
       {hasMessages ? (
         <div className="messages">
           {conversation.messages.map((msg, i) => (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              streaming={
-                streaming &&
-                msg.role === "assistant" &&
-                i === conversation.messages.length - 1
-              }
-            />
+            <div key={msg.id}>
+              <MessageBubble
+                message={msg}
+                streaming={
+                  streaming &&
+                  msg.role === "assistant" &&
+                  i === conversation.messages.length - 1
+                }
+              />
+              {msg.metrics && (
+                <MetricsPanel metrics={msg.metrics} />
+              )}
+            </div>
           ))}
-          {conversation.metrics && !streaming && (
-            <MetricsPanel metrics={conversation.metrics} />
-          )}
           <div ref={messagesEndRef} />
         </div>
       ) : (

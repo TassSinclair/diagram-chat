@@ -37,8 +37,6 @@ export function streamOpenRouter(
     `data: ${JSON.stringify({ type: "session", model })}\n\n`
   );
 
-  const startTime = Date.now();
-
   fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -70,7 +68,7 @@ export function streamOpenRouter(
       let buffer = "";
       let inputTokens = 0;
       let outputTokens = 0;
-      let ttft: number | null = null;
+      let thinkingTokens = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -91,11 +89,12 @@ export function streamOpenRouter(
             if (chunk.usage) {
               inputTokens = chunk.usage.prompt_tokens || 0;
               outputTokens = chunk.usage.completion_tokens || 0;
+              thinkingTokens =
+                chunk.usage.completion_tokens_details?.reasoning_tokens || 0;
             }
 
             const delta = chunk.choices?.[0]?.delta;
             if (delta?.content) {
-              if (ttft === null) ttft = Date.now() - startTime;
               res.write(
                 `data: ${JSON.stringify({ type: "text", text: delta.content })}\n\n`
               );
@@ -106,29 +105,13 @@ export function streamOpenRouter(
         }
       }
 
-      const durationMs = Date.now() - startTime;
-      const inputCostPer1M = 0.15;
-      const outputCostPer1M = 0.60;
-      const totalCostUsd =
-        (inputTokens * inputCostPer1M + outputTokens * outputCostPer1M) /
-        1_000_000;
-
       res.write(
         `data: ${JSON.stringify({
           type: "metrics",
-          totalCostUsd,
           usage: {
             input_tokens: inputTokens,
             output_tokens: outputTokens,
-          },
-          durationMs,
-          ttftMs: ttft || 0,
-          modelUsage: {
-            [model]: {
-              inputTokens,
-              outputTokens,
-              costUSD: totalCostUsd,
-            },
+            thinking_tokens: thinkingTokens,
           },
         })}\n\n`
       );
