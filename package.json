@@ -13,7 +13,8 @@
   "dependencies": {
     "@d2lang/d2": "^0.1.34",
     "dotenv": "^17.4.2",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "reladraw": "^0.13.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

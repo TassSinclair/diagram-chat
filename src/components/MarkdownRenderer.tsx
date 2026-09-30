@@ -5,6 +5,7 @@ import rehypeRaw from "rehype-raw";
 import type { Components } from "react-markdown";
 import { MermaidBlock } from "./MermaidBlock";
 import { D2Block } from "./D2Block";
+import { ReladrawBlock } from "./ReladrawBlock";
 
 function makeComponents(streaming: boolean): Partial<Components> {
   return {
@@ -19,6 +20,10 @@ function makeComponents(streaming: boolean): Partial<Components> {
 
       if (lang === "d2" && !streaming) {
         return <D2Block code={code} />;
+      }
+
+      if (lang === "reladraw" && !streaming) {
+        return <ReladrawBlock code={code} />;
       }
 
       if (lang) {
